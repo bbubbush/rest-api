@@ -56,12 +56,10 @@ public class EventControllerTests {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(jsonPath("id").value(Matchers.not(10)))
                 .andExpect(jsonPath("free").value(false))
-                .andExpect(jsonPath("offline").value(false))
+                .andExpect(jsonPath("offline").value(true))
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
-
         ;
-
     }
 
     @Test
