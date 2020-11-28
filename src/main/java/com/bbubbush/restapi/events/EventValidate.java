@@ -17,5 +17,8 @@ public class EventValidate {
         || eventDto.getEndEventDateTime().isBefore(eventDto.getBeginEnrollmentDateTime())) {
             errors.rejectValue("endEventDateTime", "wrongValue", "EndEventDateTime is wrong.");
         }
+        // TODO beginEventDateTime
+
+        // TODO bebinEnrollmentDateTime
     }
 }
