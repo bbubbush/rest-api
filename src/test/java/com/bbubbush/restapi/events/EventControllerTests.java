@@ -59,6 +59,9 @@ public class EventControllerTests {
                 .andExpect(jsonPath("offline").value(true))
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.update").exists())
+                .andExpect(jsonPath("_links.events").exists())
         ;
     }
 
@@ -93,7 +96,7 @@ public class EventControllerTests {
     }
 
     @Test
-    @TestDescription("빈 데이터를 전달하여 401 발생")
+    @TestDescription("빈 데이터를 전달하여 400 발생")
     public void createEvent_BadRequest_Nodata() throws Exception {
         // given
         EventDto event = EventDto.builder()
@@ -106,11 +109,15 @@ public class EventControllerTests {
                 .content(objectMapper.writeValueAsString(event)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[0].objectName").exists())
+                .andExpect(jsonPath("$[0].code").exists())
+                .andExpect(jsonPath("$[0].field").exists())
+                .andExpect(jsonPath("$[0].defaultMessage").exists())
         ;
     }
 
     @Test
-    @TestDescription("로직에 위반되는 데이터를 전달해 401 발생")
+    @TestDescription("로직에 위반되는 데이터를 전달해 400 발생")
     public void createEvent_BadRequest_InvalidData() throws Exception {
         // given
         EventDto event = EventDto.builder()
