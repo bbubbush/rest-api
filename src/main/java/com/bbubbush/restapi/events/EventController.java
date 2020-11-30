@@ -1,5 +1,6 @@
 package com.bbubbush.restapi.events;
 
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
@@ -18,13 +19,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Controller
 @RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_VALUE)
+@RequiredArgsConstructor
 public class EventController {
-    @Autowired
-    private EventRepository eventRepository;
-    @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
-    private EventValidate eventValidate;
+    private final EventRepository eventRepository;
+    private final ModelMapper modelMapper;
+    private final EventValidate eventValidate;
 
     @PostMapping
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
