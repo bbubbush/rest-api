@@ -15,7 +15,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.time.LocalDateTime;
 import java.util.stream.IntStream;
@@ -227,11 +226,48 @@ public class EventControllerTests {
         // then
     }
 
-    private void generateEvents(int i) {
+    @Test
+    @TestDescription("이벤트 단일 조회")
+    public void getEvent() throws Exception{
+        // given
+        Event event = generateEvents(100);
+
+        // when
+        this.mockMvc.perform(get("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(print())
+                .andDo(document("get-event"))
+        ;
+    }
+
+    @Test
+    @TestDescription("이벤트 단일 조회 실패")
+    public void getEvent_NotFound() throws Exception{
+        // given
+
+        // when
+        this.mockMvc.perform(get("/api/events/{id}", "100")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(print())
+                .andDo(document("get-event"))
+        ;
+    }
+
+
+
+    private Event generateEvents(int i) {
         Event event = Event.builder()
                 .name("Evnet " + i)
                 .description("For paging " + i)
                 .build();
-        eventRepository.save(event);
+        return eventRepository.save(event);
     }
 }
