@@ -57,7 +57,8 @@ public class EventController {
     @GetMapping
     public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
         Page<Event> page = eventRepository.findAll(pageable);
-        PagedModel<EntityModel<Event>> entityModels = assembler.toModel(page, entity -> EntityModel.of(entity).add(linkTo(EventController.class).slash(entity.getId()).withRel("self")));
+        PagedModel<EntityModel<Event>> entityModels = assembler.toModel(page, entity -> EntityModel.of(entity)
+                .add(linkTo(EventController.class).slash(entity.getId()).withRel("self")));
         entityModels.add(new Link("http://localhost:8080//docs/index.html#create-event").withRel("profile"));
         return ResponseEntity.ok(entityModels);
     }
@@ -74,6 +75,14 @@ public class EventController {
                 .add(new Link("http://localhost:8080/docs/index.html#get-event").withRel("profile"))
                 ;
         return ResponseEntity.ok(entityModel);
+    }
+    @PutMapping
+    public ResponseEntity updateEvent(Event event) {
+        Optional<Event> optionalEvent = eventRepository.findById(event.getId());
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(optionalEvent.get());
     }
 
 
