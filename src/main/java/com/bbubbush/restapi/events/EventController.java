@@ -1,6 +1,5 @@
 package com.bbubbush.restapi.events;
 
-import com.bbubbush.restapi.index.IndexController;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -10,7 +9,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -21,7 +19,6 @@ import java.net.URI;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_VALUE)
@@ -67,6 +64,7 @@ public class EventController {
     public ResponseEntity queryEvent(@PathVariable Integer id){
         Optional<Event> optionalEvent = eventRepository.findById(id);
         if (optionalEvent.isEmpty()) {
+
             return ResponseEntity.notFound().build();
         }
         Event event = optionalEvent.get();
@@ -76,13 +74,29 @@ public class EventController {
                 ;
         return ResponseEntity.ok(entityModel);
     }
-    @PutMapping
-    public ResponseEntity updateEvent(Event event) {
-        Optional<Event> optionalEvent = eventRepository.findById(event.getId());
+
+    @PutMapping("/{id}")
+    public ResponseEntity updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors) {
+        Optional<Event> optionalEvent = eventRepository.findById(id);
         if (optionalEvent.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(optionalEvent.get());
+        if (errors.hasErrors()) {
+            return badRequest(errors);
+        }
+        eventValidate.validate(eventDto, errors);
+        if (errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        Event findEvent = optionalEvent.get();
+        this.modelMapper.map(eventDto, findEvent);
+        Event saveEvent = eventRepository.save(findEvent);
+
+        EntityModel<Event> entityModel = EntityModel.of(saveEvent)
+                .add(linkTo(EventController.class).slash(saveEvent.getId()).withRel("self"))
+                .add(new Link("http://localhost:8080/docs/index.html#update-event").withRel("profile"));
+        return ResponseEntity.ok(entityModel);
     }
 
 
