@@ -1,20 +1,15 @@
 package com.bbubbush.restapi.accounts;
 
-import lombok.RequiredArgsConstructor;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.support.discovery.SelectorResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Set;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -23,7 +18,7 @@ class AccountServiceTest {
     @Autowired
     private AccountService accountService;
     @Autowired
-    private AccountRepository accountRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Test
     public void findByUserName() {
@@ -35,13 +30,13 @@ class AccountServiceTest {
                 .password(password)
                 .roles(Set.of(AccountRoles.ADMIN, AccountRoles.USER))
                 .build();
-        accountRepository.save(account);
+        accountService.saveAccount(account);
 
         // when
         UserDetails userDetails = accountService.loadUserByUsername(account.getEmail());
 
         // then
-        assertEquals(password, userDetails.getPassword());
+        assertTrue(passwordEncoder.matches(password, userDetails.getPassword()));
         assertEquals(email, userDetails.getUsername());
     }
 

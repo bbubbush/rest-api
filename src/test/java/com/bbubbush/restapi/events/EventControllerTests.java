@@ -96,6 +96,7 @@ public class EventControllerTests extends BaseControllerTest {
                                 , fieldWithPath("free").description("event free")
                                 , fieldWithPath("offline").description("event offline")
                                 , fieldWithPath("eventStatus").description("event eventStatus")
+                                , fieldWithPath("manager").description("event manager")
                                 , fieldWithPath("_links.self.href").description("event links.self")
                                 , fieldWithPath("_links.update.href").description("event links.update")
                                 , fieldWithPath("_links.events.href").description("event links.events")
