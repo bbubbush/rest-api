@@ -32,9 +32,10 @@ public class OAuth2ServerConfigTests extends BaseControllerTest {
                 .roles(Set.of(AccountRoles.ADMIN, AccountRoles.USER))
                 .build();
         Account saveAccount = this.accountService.saveAccount(account);
-
         String clientId = "myApp";
         String clientPass = "pass";
+
+        // when
         mockMvc.perform(post("/oauth/token")
                     .with(httpBasic(clientId, clientPass))
                     .param("username", username)
@@ -44,6 +45,5 @@ public class OAuth2ServerConfigTests extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("access_token").exists())
         ;
-
     }
 }

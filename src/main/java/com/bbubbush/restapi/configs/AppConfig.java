@@ -33,7 +33,7 @@ public class AppConfig {
     public ApplicationRunner applicationRunner() {
         return args -> {
             Account bbubbush = Account.builder()
-                    .email("bbubbush@gmail.com")
+                    .email("bbubbush@test.com")
                     .password("bbubbush")
                     .roles(Set.of(AccountRoles.ADMIN, AccountRoles.USER))
                     .build();
