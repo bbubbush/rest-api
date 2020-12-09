@@ -3,6 +3,7 @@ package com.bbubbush.restapi.configs;
 import com.bbubbush.restapi.accounts.Account;
 import com.bbubbush.restapi.accounts.AccountRoles;
 import com.bbubbush.restapi.accounts.AccountService;
+import com.bbubbush.restapi.common.AppProperties;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -16,9 +17,6 @@ import java.util.Set;
 
 @Configuration
 public class AppConfig {
-    @Autowired
-    private AccountService accountService;
-
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
@@ -31,13 +29,29 @@ public class AppConfig {
 
     @Bean
     public ApplicationRunner applicationRunner() {
-        return args -> {
-            Account bbubbush = Account.builder()
-                    .email("bbubbush@test.com")
-                    .password("bbubbush")
-                    .roles(Set.of(AccountRoles.ADMIN, AccountRoles.USER))
-                    .build();
-            accountService.saveAccount(bbubbush);
+        return new ApplicationRunner() {
+            @Autowired
+            private AccountService accountService;
+
+            @Autowired
+            private AppProperties appProperties;
+
+            @Override
+            public void run(ApplicationArguments args) throws Exception {
+                Account admin = Account.builder()
+                        .email(appProperties.getAdminUsername())
+                        .password(appProperties.getAdminPassword())
+                        .roles(Set.of(AccountRoles.ADMIN))
+                        .build();
+                accountService.saveAccount(admin);
+
+                Account user = Account.builder()
+                        .email(appProperties.getUserUsername())
+                        .password(appProperties.getUserPassword())
+                        .roles(Set.of(AccountRoles.USER))
+                        .build();
+                accountService.saveAccount(user);
+            }
         };
     }
 }

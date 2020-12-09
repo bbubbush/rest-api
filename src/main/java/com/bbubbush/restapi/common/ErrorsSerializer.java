@@ -1,4 +1,4 @@
-package com.bbubbush.restapi.common.annotation;
+package com.bbubbush.restapi.common;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

@@ -5,41 +5,28 @@ import com.bbubbush.restapi.accounts.AccountRoles;
 import com.bbubbush.restapi.accounts.AccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Set;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class OAuth2ServerConfigTests extends BaseControllerTest {
     @Autowired
-    private AccountService accountService;
+    private AppProperties appProperties;
 
     @Test
     public void getAuthToken() throws Exception{
         // given
-        String username = "bbubbush@mail.com";
-        String password = "bbubbush";
-        Account account = Account.builder()
-                .email(username)
-                .password(password)
-                .roles(Set.of(AccountRoles.ADMIN, AccountRoles.USER))
-                .build();
-        Account saveAccount = this.accountService.saveAccount(account);
-        String clientId = "myApp";
-        String clientPass = "pass";
 
         // when
         mockMvc.perform(post("/oauth/token")
-                    .with(httpBasic(clientId, clientPass))
-                    .param("username", username)
-                    .param("password", password)
+                    .with(httpBasic(appProperties.getClientId(), appProperties.getClientPassword()))
+                    .param("username", appProperties.getUserUsername())
+                    .param("password", appProperties.getUserPassword())
                     .param("grant_type", "password"))
                 .andDo(print())
                 .andExpect(status().isOk())

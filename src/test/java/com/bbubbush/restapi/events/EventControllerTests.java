@@ -1,14 +1,11 @@
 package com.bbubbush.restapi.events;
 
-import com.bbubbush.restapi.accounts.Account;
 import com.bbubbush.restapi.accounts.AccountRepository;
-import com.bbubbush.restapi.accounts.AccountRoles;
 import com.bbubbush.restapi.accounts.AccountService;
+import com.bbubbush.restapi.common.AppProperties;
 import com.bbubbush.restapi.common.BaseControllerTest;
 import com.bbubbush.restapi.common.annotation.TestDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
@@ -18,11 +15,12 @@ import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.stream.IntStream;
 
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.*;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -37,12 +35,8 @@ public class EventControllerTests extends BaseControllerTest {
     AccountService accountService;
     @Autowired
     AccountRepository accountRepository;
-
-    @BeforeEach
-    public void setUp() {
-        accountRepository.deleteAll();
-        eventRepository.deleteAll();
-    }
+    @Autowired
+    AppProperties appProperties;
 
     @Test
     @TestDescription("201 등록성공 응답을 전달")
@@ -368,7 +362,6 @@ public class EventControllerTests extends BaseControllerTest {
 
     }
 
-
     private Event generateEvents(int i) {
         Event event = Event.builder()
                 .name("Evnet " + i)
@@ -388,23 +381,10 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     private String getAccessToken() throws Exception {
-        // given
-        String username = "bbubbush@gmail.com";
-        String password = "bbubbush";
-        Account account = Account.builder()
-                .email(username)
-                .password(password)
-                .roles(Set.of(AccountRoles.ADMIN, AccountRoles.USER))
-                .build();
-        Account saveAccount = this.accountService.saveAccount(account);
-        String clientId = "myApp";
-        String clientPass = "pass";
-
-        // when
         ResultActions resultActions = mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientPass))
-                .param("username", username)
-                .param("password", password)
+                .with(httpBasic(appProperties.getClientId(), appProperties.getClientPassword()))
+                .param("username", appProperties.getUserUsername())
+                .param("password", appProperties.getUserPassword())
                 .param("grant_type", "password"))
                 .andDo(print())
                 .andExpect(status().isOk())
