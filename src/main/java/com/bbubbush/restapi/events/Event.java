@@ -24,7 +24,7 @@ public class Event {
     private int limitOfEnrollment;
     private boolean offline;
     private boolean free;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Account manager;
 
     @Enumerated(EnumType.STRING)
