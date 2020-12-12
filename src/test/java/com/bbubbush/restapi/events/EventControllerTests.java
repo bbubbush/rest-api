@@ -1,6 +1,8 @@
 package com.bbubbush.restapi.events;
 
+import com.bbubbush.restapi.accounts.Account;
 import com.bbubbush.restapi.accounts.AccountRepository;
+import com.bbubbush.restapi.accounts.AccountRoles;
 import com.bbubbush.restapi.accounts.AccountService;
 import com.bbubbush.restapi.common.AppProperties;
 import com.bbubbush.restapi.common.BaseControllerTest;
@@ -15,6 +17,7 @@ import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -94,7 +97,7 @@ public class EventControllerTests extends BaseControllerTest {
                                 , fieldWithPath("maxPrice").description("event maxPrice")
                                 , fieldWithPath("limitOfEnrollment").description("event limitOfEnrollment")
                         ),
-                        responseFields(
+                        relaxedResponseFields(
                                 fieldWithPath("id").description("event id")
                                 , fieldWithPath("name").description("event name")
                                 , fieldWithPath("description").description("event description")
@@ -109,7 +112,6 @@ public class EventControllerTests extends BaseControllerTest {
                                 , fieldWithPath("free").description("event free")
                                 , fieldWithPath("offline").description("event offline")
                                 , fieldWithPath("eventStatus").description("event eventStatus")
-                                , fieldWithPath("manager").description("event manager")
                                 , fieldWithPath("_links.self.href").description("event links.self")
                                 , fieldWithPath("_links.update.href").description("event links.update")
                                 , fieldWithPath("_links.events.href").description("event links.events")
@@ -213,11 +215,11 @@ public class EventControllerTests extends BaseControllerTest {
 
         // when
         this.mockMvc.perform(get("/api/events")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaTypes.HAL_JSON)
-                    .param("page", "1")
-                    .param("size", "10")
-                    .param("sort", "name,DESC"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort", "name,DESC"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("_links.self.href").exists())
                 .andExpect(jsonPath("_embedded.eventList[0]._links.self.href").exists())
@@ -227,12 +229,37 @@ public class EventControllerTests extends BaseControllerTest {
 
         // then
     }
+    @Test
+    @TestDescription("이벤트 목록 조회 중 10개씩 페이징하여 2번째 페이지 조회 + 인증 토큰")
+    public void getEvents_Has_Token() throws Exception{
+        // given
+        IntStream.range(0, 30).forEach(i -> generateEvents(i));
+
+        // when
+        this.mockMvc.perform(get("/api/events")
+                            .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaTypes.HAL_JSON)
+                            .param("page", "1")
+                            .param("size", "10")
+                            .param("sort", "name,DESC"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("_links.self.href").exists())
+                        .andExpect(jsonPath("_links.create-event.href").exists())
+                        .andExpect(jsonPath("_embedded.eventList[0]._links.self.href").exists())
+                        .andDo(print())
+                        .andDo(document("query-events"))
+        ;
+
+        // then
+    }
 
     @Test
     @TestDescription("이벤트 단일 조회")
     public void getEvent() throws Exception{
         // given
-        Event event = generateEvents(100);
+        Account account = createAccount();
+        Event event = generateEvents(100, account);
 
         // when
         this.mockMvc.perform(get("/api/events/{id}", event.getId())
@@ -244,6 +271,14 @@ public class EventControllerTests extends BaseControllerTest {
                 .andDo(print())
                 .andDo(document("get-event"))
         ;
+    }
+
+    private Account createAccount() {
+        Account account = Account.builder().email(appProperties.getUserUsername())
+                .password(appProperties.getUserPassword())
+                .roles(Set.of(AccountRoles.USER))
+                .build();
+        return accountService.saveAccount(account);
     }
 
     @Test
@@ -266,13 +301,10 @@ public class EventControllerTests extends BaseControllerTest {
     @Test
     public void updateEvent() throws Exception {
         // given
-        Event event = generateEvents(99);
-        EventDto eventDto = EventDto.builder().build();
-        this.modelMapper.map(event, eventDto);
-        String eventName = "update event";
-        String eventDescription = "update event test";
-        eventDto.setName(eventName);
-        eventDto.setDescription(eventDescription);
+        this.accountRepository.deleteAll();
+        Account account = createAccount();
+        Event event = generateEvents(99, account);
+        EventDto eventDto = this.modelMapper.map(event, EventDto.class);
 
         // when
         this.mockMvc.perform(put("/api/events/{id}", event.getId())
@@ -362,8 +394,17 @@ public class EventControllerTests extends BaseControllerTest {
 
     }
 
-    private Event generateEvents(int i) {
-        Event event = Event.builder()
+    private Event generateEvents(int i, Account account) {
+        Event event = buildEvent(i);
+        event.setManager(account);
+        return eventRepository.save(event);
+    }private Event generateEvents(int i) {
+        Event event = buildEvent(i);
+        return eventRepository.save(event);
+    }
+
+    private Event buildEvent(int i) {
+        return Event.builder()
                 .name("Evnet " + i)
                 .description("For paging " + i)
                 .beginEventDateTime(LocalDateTime.of(2020, 11, 29, 10, 00))
@@ -377,7 +418,6 @@ public class EventControllerTests extends BaseControllerTest {
                 .free(false)
                 .offline(true)
                 .build();
-        return eventRepository.save(event);
     }
 
     private String getAccessToken() throws Exception {

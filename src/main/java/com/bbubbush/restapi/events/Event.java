@@ -1,6 +1,8 @@
 package com.bbubbush.restapi.events;
 
 import com.bbubbush.restapi.accounts.Account;
+import com.bbubbush.restapi.accounts.AccountSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,8 +27,8 @@ public class Event {
     private boolean offline;
     private boolean free;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonSerialize(using = AccountSerializer.class)
     private Account manager;
-
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
 
