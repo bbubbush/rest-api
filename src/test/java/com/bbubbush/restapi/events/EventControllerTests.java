@@ -6,8 +6,8 @@ import com.bbubbush.restapi.accounts.AccountRoles;
 import com.bbubbush.restapi.accounts.AccountService;
 import com.bbubbush.restapi.common.AppProperties;
 import com.bbubbush.restapi.common.BaseControllerTest;
-import com.bbubbush.restapi.common.annotation.TestDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
@@ -42,7 +42,7 @@ public class EventControllerTests extends BaseControllerTest {
     AppProperties appProperties;
 
     @Test
-    @TestDescription("201 등록성공 응답을 전달")
+    @DisplayName("201 등록성공 응답을 전달")
     public void createEvent() throws Exception {
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         // given
@@ -126,7 +126,7 @@ public class EventControllerTests extends BaseControllerTest {
 
 
     @Test
-    @TestDescription("정해진 데이터 외 다른 데이터를 전달해 400오류를 발생")
+    @DisplayName("정해진 데이터 외 다른 데이터를 전달해 400오류를 발생")
     public void createEvent_BadRequest() throws Exception {
         // given
         Event event = Event.builder()
@@ -156,7 +156,7 @@ public class EventControllerTests extends BaseControllerTest {
         ;
     }
     @Test
-    @TestDescription("빈 데이터를 전달하여 400 발생")
+    @DisplayName("빈 데이터를 전달하여 400 발생")
     public void createEvent_BadRequest_Nodata() throws Exception {
         // given
         EventDto event = EventDto.builder()
@@ -179,7 +179,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("로직에 위반되는 데이터를 전달해 400 발생")
+    @DisplayName("로직에 위반되는 데이터를 전달해 400 발생")
     public void createEvent_BadRequest_InvalidData() throws Exception {
         // given
         EventDto event = EventDto.builder()
@@ -208,7 +208,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("이벤트 목록 조회 중 10개씩 페이징하여 2번째 페이지 조회")
+    @DisplayName("이벤트 목록 조회 중 10개씩 페이징하여 2번째 페이지 조회")
     public void getEvents() throws Exception{
         // given
         IntStream.range(0, 30).forEach(i -> generateEvents(i));
@@ -230,7 +230,7 @@ public class EventControllerTests extends BaseControllerTest {
         // then
     }
     @Test
-    @TestDescription("이벤트 목록 조회 중 10개씩 페이징하여 2번째 페이지 조회 + 인증 토큰")
+    @DisplayName("이벤트 목록 조회 중 10개씩 페이징하여 2번째 페이지 조회 + 인증 토큰")
     public void getEvents_Has_Token() throws Exception{
         // given
         IntStream.range(0, 30).forEach(i -> generateEvents(i));
@@ -255,7 +255,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("이벤트 단일 조회")
+    @DisplayName("이벤트 단일 조회")
     public void getEvent() throws Exception{
         // given
         Account account = createAccount();
@@ -282,7 +282,7 @@ public class EventControllerTests extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("이벤트 단일 조회 실패")
+    @DisplayName("이벤트 단일 조회 실패")
     public void getEvent_NotFound() throws Exception{
         // given
 

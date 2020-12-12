@@ -1,12 +1,7 @@
 package com.bbubbush.restapi.common;
 
-import com.bbubbush.restapi.accounts.Account;
-import com.bbubbush.restapi.accounts.AccountRoles;
-import com.bbubbush.restapi.accounts.AccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Set;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
