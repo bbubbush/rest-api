@@ -174,7 +174,6 @@ public class EventControllerTests extends BaseControllerTest {
                     .andExpect(jsonPath("$[0].code").exists())
                     .andExpect(jsonPath("$[0].field").exists())
                     .andExpect(jsonPath("$[0].defaultMessage").exists())
-    //                .andExpect(jsonPath("_links.index.href").exists())
         ;
     }
 
@@ -203,7 +202,6 @@ public class EventControllerTests extends BaseControllerTest {
                         .content(objectMapper.writeValueAsString(event)))
                     .andDo(print())
                     .andExpect(status().isBadRequest())
-    //                .andExpect(jsonPath("_links.index.href").exists())
         ;
     }
 
@@ -291,8 +289,6 @@ public class EventControllerTests extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON))
                 .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("_links.self").exists())
-//                .andExpect(jsonPath("_links.profile").exists())
                 .andDo(print())
                 .andDo(document("get-event"))
         ;
@@ -340,8 +336,6 @@ public class EventControllerTests extends BaseControllerTest {
                     .content(this.objectMapper.writeValueAsString(eventDto))
                 )
                 .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("_links.self").exists())
-//                .andExpect(jsonPath("_links.profile").exists())
                 .andDo(print())
                 .andDo(document("update-event"))
         ;
@@ -363,8 +357,6 @@ public class EventControllerTests extends BaseControllerTest {
                     .content(this.objectMapper.writeValueAsString(eventDto))
                 )
                 .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("_links.self").exists())
-//                .andExpect(jsonPath("_links.profile").exists())
                 .andDo(print())
                 .andDo(document("update-event"))
         ;
@@ -385,8 +377,6 @@ public class EventControllerTests extends BaseControllerTest {
                     .content(this.objectMapper.writeValueAsString(eventDto))
                 )
                 .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("_links.self").exists())
-//                .andExpect(jsonPath("_links.profile").exists())
                 .andDo(print())
                 .andDo(document("update-event"))
         ;
@@ -398,7 +388,9 @@ public class EventControllerTests extends BaseControllerTest {
         Event event = buildEvent(i);
         event.setManager(account);
         return eventRepository.save(event);
-    }private Event generateEvents(int i) {
+    }
+
+    private Event generateEvents(int i) {
         Event event = buildEvent(i);
         return eventRepository.save(event);
     }
